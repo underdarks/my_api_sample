@@ -1,0 +1,35 @@
+# ======================================================
+# Test 환경 설정 (application-test.yml)
+# ======================================================
+
+# 테스트 로깅 설정
+logging:
+  level:
+    root: WARN                     # 테스트 시 불필요한 로그 최소화
+    com.my.investment_mentor: DEBUG # 테스트 시 애플리케이션 로그 상세 출력
+    org.springframework.transaction: DEBUG
+    org.springframework.orm.jpa.JpaTransactionManager: DEBUG
+
+# Test Spring 설정
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  # 테스트 데이터소스 설정
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  # 테스트 JPA 설정
+  jpa:
+    hibernate:
+      ddl-auto: create        # 테스트 시 스키마 자동 생성 및 종료 시 삭제
+    show-sql: true                 # 테스트 시 SQL 로그 출력
+
+  # 테스트 SQL 초기화 설정
+  sql:
+    init:
+      mode: never

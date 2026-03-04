@@ -1,0 +1,69 @@
+# ======================================================
+# local 개발 환경 설정 (application-local.yml)
+# ======================================================
+
+logging:
+  level:
+    root: DEBUG
+    org.springframework.transaction: DEBUG #spring 트랜잭션 매니저 로그
+    org.springframework.orm.jpa.JpaTransactionManager: DEBUG #JPA 연동 트랜잭션 매니저 클래스의 로그
+    org.springframework.orm.jpa: DEBUG #트랜잭션의 시작과 끝 (영속성 컨텍스트 생명주기)
+    org.hibernate.SQL: DEBUG #하이버네이트의 실행 과정 (쿼리 생성 및 실행)
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.zaxxer.hikari: DEBUG #HikariCP의 커넥션 대여/반납 (리소스 흐름)
+
+
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
+      multiline: true
+      logging: slf4j
+      tracing:
+        include-parameter-values: true
+
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  datasource:
+    #    url: jdbc:mysql://localhost:3306/ecommerce?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/ecommerce?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 1234
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 1000
+      minimum-idle: 5
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      auto-commit: true
+      pool-name: 'MyEcommerce-HikariPool-Thread'
+      register-mbeans: true
+    p6spy:
+      enabled: true
+      appender: com.p6spy.engine.spy.appender.Slf4JLogger
+      logMessageFormat:
+        p6spy: "%(currentTime)|%(executionTime)|%(category)|%(sqlSingleLine)"
+    #    url: jdbc:h2:mem:~/cafeKioskApplication
+    #    driver-class-name: org.h2.Driver
+    #    username: sa
+    #    password:
+
+  jpa:
+    open-in-view: false
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        jdbc:
+          batch_size: 50
+          batch_versioned_data: true
+        order_inserts: true
+        order_updates: true
+        default_batch_fetch_size: 100
+    hibernate:
+      ddl-auto: validate

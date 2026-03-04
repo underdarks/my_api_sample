@@ -1,0 +1,42 @@
+# ======================================================
+# Production 환경 설정 (application-prod.yml)
+# ======================================================
+
+# Production Spring 설정
+# 프로덕션 로깅 설정
+logging:
+  level:
+    root: WARN                     # 프로덕션에서는 경고 이상만 로깅
+    com.my.investment_mentor: INFO # 애플리케이션 로그는 INFO 수준
+    org.springframework: WARN      # Spring 로그는 경고 이상만
+
+# 프로덕션 환경에서는 P6Spy 비활성화(성능 저하 방지)
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: false
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+
+  # 프로덕션 데이터소스 설정
+  datasource:
+    url: jdbc:mysql://0.tcp.jp.ngrok.io:13081/investment_mentor?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 50          # 프로덕션 환경에서는 커넥션 풀 크기 최대화
+      minimum-idle: 10               # 최소 유휴 커넥션 증가
+      connection-timeout: 20000      # 커넥션 타임아웃 감소
+
+  # 프로덕션 JPA 설정
+  jpa:
+    hibernate:
+      ddl-auto: none               # 프로덕션에서는 스키마 변경 없음
+    show-sql: false                # 프로덕션에서는 SQL 로깅 비활성화
+    properties:
+      hibernate:
+        format_sql: false          # 프로덕션에서는 SQL 포맷팅 비활성화

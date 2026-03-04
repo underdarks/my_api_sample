@@ -1,0 +1,26 @@
+package com.example.my_api.event.listener;
+
+import com.example.my_api.event.MemberSignUpEvent;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
+
+@Component
+@Slf4j
+public class MemberSignUpEventListener {
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleMemberSignUp(MemberSignUpEvent event) {
+        sendEmail(event.getEmail());
+    }
+
+    private void sendEmail(String email) {
+        try {
+            Thread.sleep(1); // 네트워크 i/o 시간
+            log.info("메일 전송 완료! - {}", email);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
