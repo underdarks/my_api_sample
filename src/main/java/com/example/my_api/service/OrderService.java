@@ -3,6 +3,7 @@ package com.example.my_api.service;
 import com.example.my_api.dto.OrderCreateRequest;
 import com.example.my_api.dto.OrderItemResponse;
 import com.example.my_api.dto.OrderResponse;
+import com.example.my_api.entity.Member;
 import com.example.my_api.entity.Order;
 import com.example.my_api.entity.OrderItem;
 import com.example.my_api.entity.OrderStatus;
@@ -17,6 +18,7 @@ import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -31,7 +33,43 @@ public class OrderService {
 
     @Transactional
     public OrderResponse createOrder(OrderCreateRequest request) {
-        var member = memberRepository.findById(request.memberId())
+        Member member = memberRepository.findById(request.memberId())
+            .orElseThrow(
+                () -> new ResourceNotFoundException("회원을 찾을 수 없습니다. id=" + request.memberId()));
+
+        Product product = productRepository.findById(request.productId())
+            .orElseThrow(
+                () -> new ResourceNotFoundException(
+                    "상품을 찾을 수 없습니다. id=" + request.productId()));
+
+        if (product.getStock() < request.quantity()) {
+            throw new ParameterNotValidate("재고가 부족합니다.");
+        }
+
+        Order order = Order.builder()
+            .totalPrice(product.getPrice() * request.quantity())
+            .status(OrderStatus.PENDING)
+            .buyer(member)
+            .build();
+
+        OrderItem orderItem = OrderItem.builder()
+            .product(product)
+            .quantity(request.quantity())
+            .price(product.getPrice())
+            .build();
+
+        order.addOrderItem(orderItem);
+
+        product.decreaseQuantity(request.quantity());
+
+        Order savedOrder = orderRepository.save(order);
+        return toResponse(savedOrder);
+
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public OrderResponse createOrderWithConcurrency(OrderCreateRequest request) {
+        Member member = memberRepository.findById(request.memberId())
             .orElseThrow(
                 () -> new ResourceNotFoundException("회원을 찾을 수 없습니다. id=" + request.memberId()));
 
@@ -57,7 +95,11 @@ public class OrderService {
 
         order.addOrderItem(orderItem);
 
-        product.decreaseQuantity(request.quantity());
+        int result = productRepository.decreaseStock(product.getId(), request.quantity());
+        if (result == 0) {
+            log.error("재고가 부족합니다!");
+            throw new ParameterNotValidate("재고가 부족합니다.");
+        }
 
         Order savedOrder = orderRepository.save(order);
         return toResponse(savedOrder);

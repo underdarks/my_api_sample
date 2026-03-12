@@ -2,34 +2,48 @@
 # Test 환경 설정 (application-test.yml)
 # ======================================================
 
-# 테스트 로깅 설정
+# ======================================================
+# Dev 개발 환경 설정 (application-dev.yml)
+# ======================================================
+#server:
+#  port: 8081
+
+
 logging:
   level:
-    root: WARN                     # 테스트 시 불필요한 로그 최소화
-    com.my.investment_mentor: DEBUG # 테스트 시 애플리케이션 로그 상세 출력
-    org.springframework.transaction: DEBUG
-    org.springframework.orm.jpa.JpaTransactionManager: DEBUG
+    root: INFO
+    #    org.springframework.transaction: DEBUG #spring 트랜잭션 매니저 로그
+    #    org.springframework.orm.jpa.JpaTransactionManager: DEBUG #JPA 연동 트랜잭션 매니저 클래스의 로그
+    #    org.springframework.orm.jpa: DEBUG #트랜잭션의 시작과 끝 (영속성 컨텍스트 생명주기)
+    #    org.hibernate.SQL: DEBUG #하이버네이트의 실행 과정 (쿼리 생성 및 실행)
+    #    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+#    com.zaxxer.hikari: DEBUG #HikariCP의 커넥션 대여/반납 (리소스 흐름)
 
-# Test Spring 설정
+
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
+      multiline: true
+      logging: slf4j
+      tracing:
+        include-parameter-values: true
+
 spring:
   config:
     activate:
       on-profile: test
 
-  # 테스트 데이터소스 설정
   datasource:
-    url: jdbc:h2:mem:testdb
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5433/my_api
+    username: postgres
+    password: 1234
 
-  # 테스트 JPA 설정
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create        # 테스트 시 스키마 자동 생성 및 종료 시 삭제
-    show-sql: true                 # 테스트 시 SQL 로그 출력
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
 
-  # 테스트 SQL 초기화 설정
-  sql:
-    init:
-      mode: never
