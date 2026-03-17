@@ -2,41 +2,33 @@
 # Production 환경 설정 (application-prod.yml)
 # ======================================================
 
-# Production Spring 설정
-# 프로덕션 로깅 설정
 logging:
   level:
-    root: WARN                     # 프로덕션에서는 경고 이상만 로깅
-    com.my.investment_mentor: INFO # 애플리케이션 로그는 INFO 수준
-    org.springframework: WARN      # Spring 로그는 경고 이상만
+    root: WARN
+#    org.springframework.transaction: WARN #spring 트랜잭션 매니저 로그
+#    org.springframework.orm.jpa.JpaTransactionManager: DEBUG #JPA 연동 트랜잭션 매니저 클래스의 로그
+#    org.springframework.orm.jpa: DEBUG #트랜잭션의 시작과 끝 (영속성 컨텍스트 생명주기)
+#    org.hibernate.SQL: DEBUG #하이버네이트의 실행 과정 (쿼리 생성 및 실행)
+#    #    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+##    com.zaxxer.hikari: DEBUG #HikariCP의 커넥션 대여/반납 (리소스 흐름)
 
-# 프로덕션 환경에서는 P6Spy 비활성화(성능 저하 방지)
-decorator:
-  datasource:
-    p6spy:
-      enable-logging: false
+
 
 spring:
   config:
     activate:
       on-profile: prod
 
-
-  # 프로덕션 데이터소스 설정
   datasource:
-    url: jdbc:mysql://0.tcp.jp.ngrok.io:13081/investment_mentor?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    hikari:
-      maximum-pool-size: 50          # 프로덕션 환경에서는 커넥션 풀 크기 최대화
-      minimum-idle: 10               # 최소 유휴 커넥션 증가
-      connection-timeout: 20000      # 커넥션 타임아웃 감소
+    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_URL}        # ← 환경변수로
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
 
-  # 프로덕션 JPA 설정
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: none               # 프로덕션에서는 스키마 변경 없음
-    show-sql: false                # 프로덕션에서는 SQL 로깅 비활성화
-    properties:
-      hibernate:
-        format_sql: false          # 프로덕션에서는 SQL 포맷팅 비활성화
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+
