@@ -2,7 +2,7 @@ name: API Server Prod Deploy
 
 on:
   push:
-    branches: [ main ]  # main 브랜치 push 시 실행
+    branches: [ main ]  # main 브랜치 push 시 jobs 실행
 
 jobs:
   deploy:
