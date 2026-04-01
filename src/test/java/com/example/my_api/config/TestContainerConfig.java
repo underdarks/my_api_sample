@@ -10,11 +10,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @TestConfiguration(proxyBeanMethods = false)
 public class TestContainerConfig {
 
-
-    // 이미지 버전만 외부화 (바뀔 수 있는 값)
-    @Value("${testcontainers.postgres.image}")
-    private String postgresImage;
-
     @Bean
     @ServiceConnection // 스프링 부트 4.0이 컨테이너 정보를 자동으로 DataSource에 주입함
     public PostgreSQLContainer<?> postgresContainer(
