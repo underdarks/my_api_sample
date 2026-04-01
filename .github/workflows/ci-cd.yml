@@ -20,12 +20,12 @@ jobs:
         with:
           java-version: '25'
           distribution: 'temurin'
-          cache: gradle # 빌드 속도 향상을 위한 캐시 추가
+          cache: gradle
 
       - name: Grant execute permission
         run: chmod +x ./gradlew
 
-      # 1. 테스트 단계 (여기서 실패하면 배포 중단)
+      # 1. 테스트 단계
       - name: Run Test
         run: ./gradlew test
 
@@ -41,30 +41,35 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 4. Docker 빌드 및 푸시 (Docker 안에서 빌드하므로 외부 jar 빌드 생략 가능)
+      # 4. Docker 빌드 및 푸시
       - name: Build and push Docker image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY}}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
           IMAGE_TAG: latest
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      # 5. EC2 배포 (SSH Key 필요)
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master # SSH 접속을 위한 전용 액션 권장
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
-            docker pull ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
-            docker stop app || true
-            docker rm app || true
-            docker run -d -p 8080:8080 --name my_api_server \
-              -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
-              -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
-              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest
+      # 5. [수정됨] EC2 배포 (SSM 방식 - SSH 접속 없음)
+      - name: Deploy to EC2 via SSM
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+        run: |
+          # 쉼표로 구분된 여러 대의 Instance ID를 처리할 수 있습니다.
+          aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --instance-ids ${{ secrets.EC2_INSTANCE_IDS }} \
+            --comment "Deploy Spring Boot App" \
+            --parameters "commands=[
+              'aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin $ECR_REGISTRY',
+              'docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest',
+              'docker stop app || true',
+              'docker rm app || true',
+              'docker run -d -p 8080:8080 --name app \
+                -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
+                -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
+                -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
+                $ECR_REGISTRY/$ECR_REPOSITORY:latest'
+            ]"
