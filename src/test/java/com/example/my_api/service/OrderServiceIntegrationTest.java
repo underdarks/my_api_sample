@@ -81,7 +81,7 @@ class OrderServiceIntegrationTest {
         //given
         OrderCreateRequest request = new OrderCreateRequest(999L, 1L, 1);
 
-        //when, then
+        //when,then
         assertThatThrownBy(() -> orderService.createOrder(request))
             .isInstanceOf(ResourceNotFoundException.class)
             .hasMessage("회원을 찾을 수 없습니다. id=999");
