@@ -57,7 +57,6 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         run: |
-          # 쉼표로 구분된 여러 대의 Instance ID를 처리할 수 있습니다.
           aws ssm send-command \
             --document-name "AWS-RunShellScript" \
             --instance-ids ${{ secrets.EC2_INSTANCE_IDS }} \
