@@ -13,7 +13,7 @@ public class HealthCheck {
 
     @GetMapping
     public ResponseEntity<String> health() {
-        return ResponseEntity.ok("GOOD GOOD");
+        return ResponseEntity.ok("GOOD GOOD2");
     }
 
 }
