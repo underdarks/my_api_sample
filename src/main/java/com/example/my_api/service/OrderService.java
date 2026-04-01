@@ -31,7 +31,7 @@ public class OrderService {
     private final MemberRepository memberRepository;
 
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public OrderResponse createOrder(OrderCreateRequest request) {
         Member member = memberRepository.findById(request.memberId())
             .orElseThrow(
@@ -62,13 +62,57 @@ public class OrderService {
 
         product.decreaseQuantity(request.quantity());
 
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         Order savedOrder = orderRepository.save(order);
         return toResponse(savedOrder);
 
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public OrderResponse createOrderWithConcurrency(OrderCreateRequest request) {
+    public OrderResponse createOrderWithUpdateLock(OrderCreateRequest request) {
+        Member member = memberRepository.findById(request.memberId())
+            .orElseThrow(
+                () -> new ResourceNotFoundException("회원을 찾을 수 없습니다. id=" + request.memberId()));
+
+        Product product = productRepository.findById(request.productId())
+            .orElseThrow(
+                () -> new ResourceNotFoundException("상품을 찾을 수 없습니다. id=" + request.productId()));
+
+        if (product.getStock() < request.quantity()) {
+            throw new ParameterNotValidate("재고가 부족합니다.");
+        }
+
+        Order order = Order.builder()
+            .totalPrice(product.getPrice() * request.quantity())
+            .status(OrderStatus.PENDING)
+            .buyer(member)
+            .build();
+
+        OrderItem orderItem = OrderItem.builder()
+            .product(product)
+            .quantity(request.quantity())
+            .price(product.getPrice())
+            .build();
+
+        order.addOrderItem(orderItem);
+
+        int result = productRepository.decreaseStock(product.getId(), request.quantity());
+        if (result == 0) {
+            log.error("재고가 부족합니다!");
+            throw new ParameterNotValidate("재고가 부족합니다.");
+        }
+
+        Order savedOrder = orderRepository.save(order);
+        return toResponse(savedOrder);
+    }
+
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public OrderResponse createOrderWithXLock(OrderCreateRequest request) {
         Member member = memberRepository.findById(request.memberId())
             .orElseThrow(
                 () -> new ResourceNotFoundException("회원을 찾을 수 없습니다. id=" + request.memberId()));

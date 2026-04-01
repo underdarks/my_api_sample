@@ -10,17 +10,15 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 public class MemberSignUpEventListener {
 
+    //    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleMemberSignUp(MemberSignUpEvent event) {
-        sendEmail(event.getEmail());
-    }
-
-    private void sendEmail(String email) {
         try {
-            Thread.sleep(1); // 네트워크 i/o 시간
-            log.info("메일 전송 완료! - {}", email);
+            Thread.sleep(1000); // 네트워크 i/o 시간
+            log.info("메일 전송 완료! - {}", event.getEmail());
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
+
 }

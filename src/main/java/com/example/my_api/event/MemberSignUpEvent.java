@@ -1,14 +1,11 @@
 package com.example.my_api.event;
 
-import org.springframework.context.ApplicationEvent;
-
-public class MemberSignUpEvent extends ApplicationEvent {
+public class MemberSignUpEvent {
 
     private final String email;
     private final Long memberId;
 
-    public MemberSignUpEvent(Object source, Long memberId, String email) {
-        super(source);
+    public MemberSignUpEvent(Long memberId, String email) {
         this.memberId = memberId;
         this.email = email;
     }

@@ -3,6 +3,7 @@ package com.example.my_api.service;
 import com.example.my_api.dto.MemberResponse;
 import com.example.my_api.dto.MemberSignUpRequest;
 import com.example.my_api.entity.Member;
+import com.example.my_api.event.MemberSignUpEvent;
 import com.example.my_api.exception.ParameterNotValidate;
 import com.example.my_api.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class MemberService {
             .build();
 
         Member saved = memberRepository.save(member);
-//        eventPublisher.publishEvent(new MemberSignUpEvent(this, saved.getId(), saved.getEmail()));
+        eventPublisher.publishEvent(new MemberSignUpEvent(saved.getId(), saved.getEmail()));
         return new MemberResponse(saved.getId(), saved.getEmail());
     }
 

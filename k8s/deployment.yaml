@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment          # 오브젝트 종류 명시
+metadata:
+  name: nginx-deploy
+spec:
+  replicas: 3              # 항상 3개의 Pod를 유지
+  selector:
+    matchLabels:
+      app: nginx           # 이 레이블을 가진 Pod를 관리 대상으로 삼음
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1   # 동시에 최대 1개 Pod까지 중단 허용
+      maxSurge: 1         # 동시에 최대 1개 Pod까지 초과 생성 허용
+  template: # 아래부터가 Pod 정의 (Pod YAML과 동일한 구조)
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.25
+          ports:
+            - containerPort: 80
+
+

@@ -173,7 +173,7 @@ class OrderServiceIntegrationTest {
                 executor.submit(() -> {
                     try {
                         startLatch.await(); //모든 스레드 여기서 대기 후
-                        orderService.createOrderWithConcurrency(request); //로직 실행(race-condition 발생)
+                        orderService.createOrderWithXLock(request); //로직 실행(race-condition 발생)
                         successCount.incrementAndGet(); //주문 성공 카운트
                     } catch (Exception e) {
                         failCount.incrementAndGet(); //실패 처리 카운트

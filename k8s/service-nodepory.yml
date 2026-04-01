@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+spec:
+  type: NodePort          # Service 타입 지정
+  selector:
+    app: nginx            # 이 레이블을 가진 Pod들에게 트래픽 전달
+  ports:
+    - port: 80            # Service 내부 포트
+      targetPort: 80      # Pod의 containerPort
+      nodePort: 30080     # 외부에서 접근할 포트 (30000~32767)
+
