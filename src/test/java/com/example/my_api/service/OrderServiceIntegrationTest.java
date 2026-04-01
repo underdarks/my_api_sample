@@ -3,6 +3,7 @@ package com.example.my_api.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.example.my_api.config.TestContainerConfig;
 import com.example.my_api.dto.OrderCreateRequest;
 import com.example.my_api.dto.OrderResponse;
 import com.example.my_api.entity.Member;
@@ -28,12 +29,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
  * OrderService 통합 테스트
  */
 @SpringBootTest
+@Import(TestContainerConfig.class)
 @ActiveProfiles("test")
 class OrderServiceIntegrationTest {
 

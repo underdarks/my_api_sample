@@ -65,9 +65,10 @@ jobs:
             --parameters "commands=[
               'aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin $ECR_REGISTRY',
               'docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest',
-              'docker stop app || true',
-              'docker rm app || true',
-              'docker run -d -p 8080:8080 --name app \
+              'docker stop my_api_server || true',
+              'docker rm my_api_server || true',
+              'docker run -d -p 8080:8080 --name my_api_server \
+                -e SPRING_PROFILES_ACTIVE=prod \
                 -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
                 -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
                 -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \

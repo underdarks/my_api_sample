@@ -2,12 +2,6 @@
 # Test 환경 설정 (application-test.yml)
 # ======================================================
 
-# ======================================================
-# Dev 개발 환경 설정 (application-dev.yml)
-# ======================================================
-#server:
-#  port: 8081
-
 
 logging:
   level:
@@ -29,6 +23,10 @@ decorator:
       tracing:
         include-parameter-values: true
 
+testcontainers:
+  postgres:
+    image: postgres:18-alpine  # 프로덕션 DB 버전과 맞추는 게 유일한 관심사
+
 spring:
   config:
     activate:
@@ -46,4 +44,3 @@ spring:
       ddl-auto: update
     show-sql: true
     open-in-view: false
-
