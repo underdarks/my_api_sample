@@ -4,7 +4,6 @@ import com.example.my_api.dto.MemberResponse;
 import com.example.my_api.dto.MemberSignUpRequest;
 import com.example.my_api.entity.Member;
 import com.example.my_api.event.MemberSignUpEvent;
-import com.example.my_api.exception.ParameterNotValidate;
 import com.example.my_api.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,9 +21,9 @@ public class MemberService {
 
     @Transactional
     public MemberResponse signUp(MemberSignUpRequest request) {
-        if (memberRepository.existsByEmail(request.email())) {
-            throw new ParameterNotValidate("이미 가입된 이메일입니다.");
-        }
+//        if (memberRepository.existsByEmail(request.email())) {
+//            throw new ParameterNotValidate("이미 가입된 이메일입니다.");
+//        }
 
         Member member = Member.builder()
             .email(request.email())

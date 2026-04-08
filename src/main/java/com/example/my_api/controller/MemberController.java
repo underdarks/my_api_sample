@@ -24,6 +24,6 @@ public class MemberController {
     @PostMapping("/signup")
     public ResponseEntity<MemberResponse> signUp(@Valid @RequestBody MemberSignUpRequest request) {
         MemberResponse response = memberService.signUp(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
